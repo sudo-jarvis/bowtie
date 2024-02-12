@@ -22,7 +22,7 @@ jobs:
   store-prev-reports:
     runs-on: ubuntu-latest
     steps:
-    - name: Free up disk space
+      - name: Free up disk space
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/lib/android /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
       # - name: Download previous test report from local artifact
