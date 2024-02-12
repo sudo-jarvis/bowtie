@@ -34,6 +34,9 @@ jobs:
           name: report
           path: previous
 
+      - name: Check
+        run: ls -ltrh previous/
+
       - name: Upload previous test report to previous folder in artifact
         uses: actions/upload-artifact@v3
         with:
