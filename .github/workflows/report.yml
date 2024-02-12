@@ -22,10 +22,6 @@ jobs:
   store-prev-reports:
     runs-on: ubuntu-latest
     steps:
-      - name: Free up disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/lib/android /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
-      
       - name: Download previous test report from local artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -34,8 +30,7 @@ jobs:
           name: report
           path: report/previous
 
-      - name: Check
-        run: ls -ltrh previous/
+        run: ls -ltrh report/previous/
 
       - name: Upload previous test report to previous folder in artifact
         uses: actions/upload-artifact@v3
