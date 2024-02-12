@@ -40,7 +40,7 @@ jobs:
       - name: Upload previous test report to previous folder in artifact
         uses: actions/upload-artifact@v3
         with:
-          name: report
+          name: report2
           path: |
             previous/
 
@@ -51,11 +51,11 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          # - draft2020-12
-          # - draft2019-09
-          # - draft7
-          # - draft6
-          # - draft4
+          - draft2020-12
+          - draft2019-09
+          - draft7
+          - draft6
+          - draft4
           - draft3
 
     steps:
