@@ -32,7 +32,7 @@ jobs:
           workflow: report.yml
           branch: test-workflow
           name: report
-          path: previous
+          path: report/previous
 
       - name: Check
         run: ls -ltrh previous/
@@ -42,7 +42,7 @@ jobs:
         with:
           name: report2
           path: |
-            previous
+            report/
 
   # test:
   #   needs: store-prev-reports
