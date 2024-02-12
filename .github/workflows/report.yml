@@ -30,6 +30,9 @@ jobs:
           name: report
           path: report/previous
 
+      - name: Remove already existing previous folder to prevent recursive folders
+        run: rm -rf report/previous/previous
+
       - name: Upload previous test report to temporary artifact
         uses: actions/upload-artifact@v3
         with:
@@ -91,9 +94,6 @@ jobs:
         with:
           name: prev-report
           path: report/
-
-      - name: Check
-        run: ls -ltrh report/previous/
 
       - name: Upload previous test report to previous folder in artifact
         uses: actions/upload-artifact@v3
