@@ -30,6 +30,7 @@ jobs:
           name: report
           path: report/previous
 
+      - name: Check
         run: ls -ltrh report/previous/
 
       - name: Upload previous test report to previous folder in artifact
