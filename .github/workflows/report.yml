@@ -25,20 +25,21 @@ jobs:
       - name: Free up disk space
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/lib/android /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
-      # - name: Download previous test report from local artifact
-      #   uses: dawidd6/action-download-artifact@v3
-      #   with:
-      #     workflow: report.yml
-      #     branch: main
-      #     name: report
-      #     path: previous
+      
+      - name: Download previous test report from local artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: report.yml
+          branch: test-workflow
+          name: report
+          path: previous
 
-      # - name: Upload previous test report to previous folder in artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: report
-      #     path: |
-      #       previous/
+      - name: Upload previous test report to previous folder in artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: report
+          path: |
+            previous/
 
   test:
     needs: store-prev-reports
