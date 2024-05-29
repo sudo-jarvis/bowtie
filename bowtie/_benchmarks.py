@@ -26,10 +26,10 @@ def get_default_benchmarks() -> Iterable[TestCase]:
         else:
             continue
 
-        tests = [Example(description="", instance=each) for each in benchmark.cases]
+        tests = [Example(description="", instance=each) for each in benchmark['cases']]
         testcase = TestCase(
-            description=benchmark.description,
-            schema=benchmark.schema,
+            description=benchmark['description'],
+            schema=benchmark['schema'],
             tests=tests,
         )
         yield testcase
