@@ -1214,7 +1214,7 @@ def perf(
         cases = []
         for benchmark in benchmarks:
             tests = [
-                Example(description="", instance=each)
+                Example(description=each['description'], instance=each['case'])
                 for each in benchmark['cases']
             ]
             cases.append(
@@ -1229,7 +1229,10 @@ def perf(
         if not instances:
             return EX.NOINPUT
         tests = [Example(description="", instance=each) for each in instances]
-        cases = [TestCase(description=description, schema=schema, tests=[test]) for test in tests]
+        cases = [
+            TestCase(description=description, schema=schema, tests=[test])
+            for test in tests
+        ]
 
     # asyncio.run(_benchmarks.run_benchmarks(cases=cases, **kwargs))
 
