@@ -17,8 +17,7 @@
         "type": "object",
         "required": ["description", "case"],
         "properties": {
-          "description": { "type": "string" },
-          "case": { "type": "object" }
+          "description": { "type": "string" }
         }
       }
     }
