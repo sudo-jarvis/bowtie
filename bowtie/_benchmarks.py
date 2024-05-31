@@ -5,8 +5,6 @@ from pathlib import Path
 import importlib, json
 from typing import Any
 
-from bowtie._core import TestCase, Example
-
 BENCHMARKS_MODULE = "bowtie.benchmarks"
 
 
@@ -16,7 +14,7 @@ def get_default_benchmarks() -> Iterable[dict[str, Any]]:
     benchmark_dir = bowtie_dir.joinpath("benchmarks").iterdir()
 
     for file in benchmark_dir:
-        if file.suffix == ".py":
+        if file.suffix == ".py" and file.name != '__init__.py':
             benchmark_module_name = "." + file.stem
             benchmark = importlib.import_module(
                 benchmark_module_name,
@@ -28,11 +26,3 @@ def get_default_benchmarks() -> Iterable[dict[str, Any]]:
             continue
 
         yield benchmark
-
-        tests = [Example(description="", instance=each) for each in benchmark['cases']]
-        testcase = TestCase(
-            description=benchmark['description'],
-            schema=benchmark['schema'],
-            tests=tests,
-        )
-        yield testcase
