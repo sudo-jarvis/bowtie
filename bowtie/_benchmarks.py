@@ -3,13 +3,14 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 import importlib, json
+from typing import Any
 
 from bowtie._core import TestCase, Example
 
 BENCHMARKS_MODULE = "bowtie.benchmarks"
 
 
-def get_default_benchmarks() -> Iterable[TestCase]:
+def get_default_benchmarks() -> Iterable[dict[str, Any]]:
 
     bowtie_dir = Path(__file__).parent
     benchmark_dir = bowtie_dir.joinpath("benchmarks").iterdir()
@@ -25,6 +26,8 @@ def get_default_benchmarks() -> Iterable[TestCase]:
             benchmark = json.loads(file.read_text())
         else:
             continue
+
+        yield benchmark
 
         tests = [Example(description="", instance=each) for each in benchmark['cases']]
         testcase = TestCase(

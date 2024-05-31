@@ -1,5 +1,5 @@
 def get_benchmark():
-    NUM_USELESS_KEYWORDS = 100000
+    num_useless_keywords = 100000
 
     return dict(
         title="Useless Keywords",
@@ -11,15 +11,17 @@ def get_benchmark():
         schema=dict(
             [
                 ("not", {"const": 42}),
-                *((str(i), i) for i in range(NUM_USELESS_KEYWORDS)),
+                *((str(i), i) for i in range(num_useless_keywords)),
                 ("type", "integer"),
                 *((str(i), i)
-                  for i in range(NUM_USELESS_KEYWORDS, NUM_USELESS_KEYWORDS)),
+                  for i in range(num_useless_keywords, num_useless_keywords)),
                 ("minimum", 37),
             ],
         ),
         cases=[
-            3737,
-            12,
+            dict(description="Beginning of schema", case=42),
+            dict(description="Middle of schema", case="foo"),
+            dict(description="End of schema", case=12),
+            dict(description="Valid", case=3737),
         ],
     )

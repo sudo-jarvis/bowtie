@@ -32,7 +32,7 @@ import rich_click as click
 import structlog
 import structlog.typing
 
-from bowtie import _connectables, _report, _suite
+from bowtie import _benchmarks, _connectables, _report, _suite
 from bowtie._commands import SeqCase, Unsuccessful
 from bowtie._core import (
     Dialect,
@@ -1185,6 +1185,53 @@ def validate(
         tests = [test.expect(expect) for test in tests]
     case = TestCase(description=description, schema=schema, tests=tests)
     return asyncio.run(_run(fail_fast=False, **kwargs, cases=[case]))
+
+
+@subcommand
+@IMPLEMENTATION
+@DIALECT
+@TIMEOUT
+@VALIDATE
+@click.option(
+    "-d",
+    "--description",
+    default="bowtie perf",
+    help="A (human-readable) description for this benchmark.",
+)
+@click.argument("schema", type=JSON(), required=False)
+@click.argument("instances", nargs=-1, type=JSON())
+def perf(
+    schema: Any,
+    instances: Iterable[Any],
+    description: str,
+    **kwargs: Any,
+):
+    """
+    Perform performance measurements across supported implementations.
+    """
+    if schema is None:
+        benchmarks = _benchmarks.get_default_benchmarks()
+        cases = []
+        for benchmark in benchmarks:
+            tests = [
+                Example(description="", instance=each)
+                for each in benchmark['cases']
+            ]
+            cases.append(
+                TestCase(
+                    description=benchmark['description'],
+                    schema=benchmark['schema'],
+                    tests=tests,
+                )
+            )
+    else:
+        # Run test over specified schema and instances
+        if not instances:
+            return EX.NOINPUT
+        tests = [Example(description="", instance=each) for each in instances]
+        cases = [TestCase(description=description, schema=schema, tests=[test]) for test in tests]
+
+    # asyncio.run(_benchmarks.run_benchmarks(cases=cases, **kwargs))
 
 
 LANGUAGE_ALIASES = {
