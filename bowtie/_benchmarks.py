@@ -145,7 +145,7 @@ class Benchmarker:
                 supports_dialect = dialect in implementation.info.dialects
 
             if not supports_dialect:
-                print(f"{connectable.to_terse()} does not supports dialect {dialect.serializable()}")
+                print(f"{connectable.to_terse()} does not supports dialect {dialect.serializable()}\n")
                 continue
 
             print(connectable.to_terse())
@@ -154,13 +154,14 @@ class Benchmarker:
             benchmark_results = []
             for benchmark in self._benchmarks:
                 if benchmark.dialect and benchmark.dialect != dialect:
-                    print(f"Skipping {benchmark.name} as it does not support dialect {dialect.serializable()}")
+                    print(f"Skipping {benchmark.name} as it does not support dialect {dialect.serializable()}\n")
                     continue
                 tests = benchmark.tests
                 for test in tests:
                     benchmark_case = benchmark.benchmark_with_diff_tests(tests=[test])
                     bench = await self._run_benchmark(
                         benchmark_case,
+                        dialect,
                         connectable,
                     )
                     if bench:
@@ -175,7 +176,7 @@ class Benchmarker:
         await self._pyperf_compare_command(*bench_suites)
         self._delete_bench_suites_if_any(bench_suites)
 
-    async def _run_benchmark(self, benchmark, connectable):
+    async def _run_benchmark(self, benchmark, dialect, connectable):
         start = perf_counter_ns()
         benchmark_name = f"{benchmark.name}  ::  {benchmark.tests[0].description}"
 
@@ -189,7 +190,9 @@ class Benchmarker:
             json.dump(benchmark_dict, file)
         try:
             output = await self._pyperf_benchmark_command(
-                "bowtie", "run", "-i", connectable.to_terse(), tmp_file,
+                "bowtie", "run", "-i", connectable.to_terse(),
+                "-D", dialect.serializable(),
+                tmp_file,
                 name=benchmark_name,
             )
         except:
