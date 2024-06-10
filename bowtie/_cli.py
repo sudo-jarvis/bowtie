@@ -8,6 +8,7 @@ from pathlib import Path
 from pprint import pformat
 from statistics import mean, median, quantiles
 from textwrap import dedent
+from time import perf_counter_ns
 from typing import TYPE_CHECKING, Literal, ParamSpec, Protocol
 import asyncio
 import json
@@ -1190,8 +1191,50 @@ def validate(
 @subcommand
 @IMPLEMENTATION
 @DIALECT
-@TIMEOUT
-@VALIDATE
+@click.option(
+    "--processes",
+    "-p",
+    "processes",
+    type=int,
+    default=3,
+    show_default=True,
+    help=(
+        "Number of processes used to run benchmarks."
+    ),
+)
+@click.option(
+    "--values",
+    "-v",
+    "values",
+    type=int,
+    default=2,
+    show_default=True,
+    help=(
+        "Number of values per process."
+    ),
+)
+@click.option(
+    "--warmups",
+    "-w",
+    "warmups",
+    type=int,
+    default=1,
+    show_default=True,
+    help=(
+        "Number of skipped values per run used to warmup the benchmark."
+    ),
+)
+@click.option(
+    "--loops",
+    "-l",
+    "loops",
+    type=int,
+    default=1,
+    show_default=True,
+    help=(
+        "Number of loops per value."
+    ),
+)
 @click.option(
     "-d",
     "--description",
@@ -1201,40 +1244,31 @@ def validate(
 @click.argument("schema", type=JSON(), required=False)
 @click.argument("instances", nargs=-1, type=JSON())
 def perf(
-    schema: Any,
-    instances: Iterable[Any],
+    connectables: Iterable[_connectables.Connectable],
     description: str,
+    dialect: Dialect,
+    instances: Iterable[Any],
+    schema: Any,
     **kwargs: Any,
 ):
     """
     Perform performance measurements across supported implementations.
     """
     if schema is None:
-        benchmarks = _benchmarks.get_default_benchmarks()
-        cases = []
-        for benchmark in benchmarks:
-            tests = [
-                Example(description=each['description'], instance=each['case'])
-                for each in benchmark['cases']
-            ]
-            cases.append(
-                TestCase(
-                    description=benchmark['description'],
-                    schema=benchmark['schema'],
-                    tests=tests,
-                )
-            )
+        benchmarker = _benchmarks.Benchmarker.from_default_benchmarks(
+            **kwargs
+        )
+
     else:
-        # Run test over specified schema and instances
         if not instances:
             return EX.NOINPUT
-        tests = [Example(description="", instance=each) for each in instances]
-        cases = [
-            TestCase(description=description, schema=schema, tests=[test])
-            for test in tests
-        ]
+        benchmarker = _benchmarks.Benchmarker.from_input(
+            schema=schema,
+            instances=instances,
+            **kwargs,
+        )
 
-    # asyncio.run(_benchmarks.run_benchmarks(cases=cases, **kwargs))
+    asyncio.run(benchmarker.start(connectables, dialect))
 
 
 LANGUAGE_ALIASES = {
@@ -1709,3 +1743,71 @@ def _redirect_structlog(log_level: int, file: TextIO = sys.stderr):
         logger_factory=structlog.WriteLoggerFactory(file),
         wrapper_class=structlog.make_filtering_bound_logger(log_level),
     )
+
+async def _run_benchmarks(
+    connectables: Iterable[_connectables.Connectable],
+    cases: Iterable[TestCase],
+    dialect: Dialect,
+    run_metadata: dict[str, Any] = {},
+    reporter: _report.Reporter = _report.Reporter(),
+    **kwargs: Any,
+) -> None:
+
+    exit_code = 0
+    implementations = []
+    # Handle Dialect ?
+    async with _start(
+        connectables=connectables,
+        reporter=reporter,
+        **kwargs,
+    ) as starting:
+        cases = _set_schema(dialect)(cases)
+        cases = [case for case in cases]
+        for each in starting:
+            try:
+                _, implementation = await each
+            except (NoSuchImplementation, StartupFailed) as error:
+                exit_code |= EX.CONFIG
+                STDERR.print(error)
+                continue
+            implementations.append(implementation)
+
+        implementation_wise = {}
+
+        for implementation in implementations:
+            rankings = []
+            rankings_dict = {}
+            print(implementation.id)
+            for _ in range(1):
+                ctt = 1
+                for count, case in enumerate(cases, 1):
+                #     ct = 1
+                #     total = 0
+                #     for test in case.tests:
+                #         if (ctt, ct)  not in rankings_dict:
+                #             rankings_dict[(ctt, ct)] = 0
+                #         temp_case = TestCase(schema=case.schema, tests=[test], description=case.description)
+                    start_time = perf_counter_ns()
+                    async for _, response in implementation.validate(dialect, [case]):
+                        time_taken = (perf_counter_ns() - start_time)/ 1e9
+                        print(time_taken)
+                        print()
+                        # total += time_taken
+                        # rankings_dict[(ctt, ct)] += time_taken
+                    # ct += 1
+                    # print(total)
+                    # print()
+                    # ctt += 1
+
+            for key in rankings_dict:
+                if key not in implementation_wise:
+                    implementation_wise[key] = (implementation.id, rankings_dict[key])
+                else:
+                    if implementation_wise[key][1] > rankings_dict[key]:
+                        implementation_wise[key] = (implementation.id, rankings_dict[key])
+
+                rankings.append((rankings_dict[key], key))
+
+            # print(sorted(rankings))
+
+        print(implementation_wise)

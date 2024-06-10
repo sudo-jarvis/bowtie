@@ -5,7 +5,7 @@ def get_benchmark():
     end = [0] * (array_size - 1) + [37]
     invalid = [0] * array_size
     return dict(
-        title="Contains Keyword",
+        name="contains",
         description=(
             "A benchmark for validation of the `contains` keyword."
         ),
@@ -13,11 +13,11 @@ def get_benchmark():
             "type": "array",
             "contains": {"const": 37},
         },
-        cases=[
-            dict(description="Empty array", case=[]),
-            dict(description="Beginning of array", case=beginning),
-            dict(description="Middle of array", case=middle),
-            dict(description="End of array", case=end),
-            dict(description="Invalid array", case=invalid),
+        tests=[
+            dict(description="Empty array", instance=[]),
+            dict(description="Beginning of array", instance=beginning),
+            dict(description="Middle of array", instance=middle),
+            dict(description="End of array", instance=end),
+            dict(description="Invalid array", instance=invalid),
         ],
     )

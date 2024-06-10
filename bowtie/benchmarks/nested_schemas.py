@@ -3,7 +3,7 @@ from itertools import cycle
 
 def get_benchmark():
     return dict(
-        title="Nested Schemas",
+        name="nested_schemas",
         description=(
             "Validating highly nested schemas shouldn't "
             "cause exponential time blowups."
@@ -24,10 +24,10 @@ def get_benchmark():
             "$ref": "https://json-schema.org/draft/2020-12/schema",
             "unevaluatedProperties": False,
         },
-        cases=[
+        tests=[
             dict(
-                description=f"No. of Levels: {levels}",
-                case=nested_object(levels=levels)
+                description=f"No of Levels {levels}",
+                instance=nested_object(levels=levels)
             ) for levels in range(1, 11, 3)
         ],
     )

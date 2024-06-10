@@ -1,8 +1,8 @@
 def get_benchmark():
-    num_useless_keywords = 100000
+    num_useless_keywords = 3000
 
     return dict(
-        title="Useless Keywords",
+        name="useless_keywords",
         description=(
             "A benchmark for validation of schemas containing "
             "lots of useless keywords. "
@@ -18,10 +18,10 @@ def get_benchmark():
                 ("minimum", 37),
             ],
         ),
-        cases=[
-            dict(description="Beginning of schema", case=42),
-            dict(description="Middle of schema", case="foo"),
-            dict(description="End of schema", case=12),
-            dict(description="Valid", case=3737),
+        tests=[
+            dict(description="Beginning of schema", instance=42),
+            dict(description="Middle of schema", instance="foo"),
+            dict(description="End of schema", instance=12),
+            dict(description="Valid", instance=3737),
         ],
     )

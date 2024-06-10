@@ -1,5 +1,5 @@
 {
-  "title": "Draft 2020-12 Metaschema",
+  "name": "Draft2020-12_MetaSchema",
   "description": "A benchmark for validation of the 2020-12 dialect's metaschema",
   "schema": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -81,10 +81,10 @@
       }
     }
   },
-  "cases": [
+  "tests": [
     {
       "description": "Validating metaschema against metaschema",
-      "case": {
+      "instance": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://json-schema.org/draft/2020-12/schema",
         "$vocabulary": {
