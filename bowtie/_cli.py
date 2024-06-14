@@ -1348,6 +1348,7 @@ def perf(
 
     if keywords:
         benchmarker = _benchmarks.Benchmarker.for_keywords(
+            dialect,
             **kwargs
         )
     elif schema is None:

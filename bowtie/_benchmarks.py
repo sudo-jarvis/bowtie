@@ -161,6 +161,7 @@ class Benchmarker:
         benchmark_groups = []
 
         for file in dialect_keyword_benchmarks:
+            print(f"Loaded {file.stem}")
             benchmark_group = _get_benchmarks_from_file(file, module=module_name)
             if not benchmark_group:
                 continue
@@ -197,28 +198,29 @@ class Benchmarker:
         dialect: Dialect,
         registry: ValidatorRegistry[Any],
     ):
-        bench_suite_for_connectable: dict[str, pyperf.BenchmarkSuite] = {}
-        for connectable in connectables:
+        connectables = [connectable for connectable in connectables]
+        for benchmark_group in self._benchmark_groups:
+            bench_suite_for_connectable: dict[str, pyperf.BenchmarkSuite] = {}
+            for connectable in connectables:
+                silent_reporter = _report.Reporter(
+                    write=lambda **_: None,  # type: ignore[reportUnknownArgumentType]
+                )
+                async with connectable.connect(
+                    reporter=silent_reporter,
+                    registry=registry,
+                ) as implementation:
+                    supports_dialect = dialect in implementation.info.dialects
 
-            silent_reporter = _report.Reporter(
-                write=lambda **_: None,  # type: ignore[reportUnknownArgumentType]
-            )
-            async with connectable.connect(
-                reporter=silent_reporter,
-                registry=registry,
-            ) as implementation:
-                supports_dialect = dialect in implementation.info.dialects
+                if not supports_dialect:
+                    print(f"{connectable.to_terse()} does not supports dialect {dialect.serializable()}")
+                    continue
 
-            if not supports_dialect:
-                print(f"{connectable.to_terse()} does not supports dialect {dialect.serializable()}")
-                continue
+                if not self._quiet:
+                    print(connectable.to_terse())
+                    print()
 
-            if not self._quiet:
-                print(connectable.to_terse())
-                print()
+                benchmark_results: list[pyperf.Benchmark] = []
 
-            benchmark_results: list[pyperf.Benchmark] = []
-            for benchmark_group in self._benchmark_groups:
                 for benchmark in benchmark_group.benchmarks:
                     if benchmark.dialect and benchmark.dialect != dialect:
                         print(f"Skipping {benchmark.name} as it does not support dialect {dialect.serializable()}")
@@ -235,21 +237,28 @@ class Benchmarker:
                         )
                         if bench:
                             benchmark_results.append(bench)
-            if len(benchmark_results):
-                benchmark_suite = pyperf.BenchmarkSuite(
-                    benchmarks=benchmark_results,
-                )
-                bench_suite_for_connectable[
-                    connectable.to_terse()
-                ] = benchmark_suite
+                if len(benchmark_results):
+                    benchmark_suite = pyperf.BenchmarkSuite(
+                        benchmarks=benchmark_results,
+                    )
+                    connectable_name = connectable.to_terse()
+                    if connectable_name=="container:730fb7bf211d58d5aee81451b460cc9c24884b297d685fc9f431ee37ffa0cbbf":
+                        connectable_name = "js-json-schema"
+                    if connectable_name=="container:85c3335fbdb617b713fe780ae373bc51df6fad1db136d70b658c985eb866f9f0":
+                        connectable_name = "java-json-schema"
+                    if connectable_name=="container:c854f39e653586d5d5e8a20fd281ac3390d3d99c0ba161170d052eb35bb9c7c2":
+                        connectable_name = "python-jsonschema"
+                    bench_suite_for_connectable[
+                        connectable_name
+                    ] = benchmark_suite
 
-            if not self._quiet:
-                print()
+                if not self._quiet:
+                    print()
 
-        bench_suite_for_connectable = self._sort_benchmark_suites(
-            bench_suite_for_connectable,
-        )
-        await self._compare_benchmark_suites(bench_suite_for_connectable)
+            bench_suite_for_connectable = self._sort_benchmark_suites(
+                bench_suite_for_connectable,
+            )
+            await self._compare_benchmark_suites(bench_suite_for_connectable)
 
     async def _compare_benchmark_suites(
         self,

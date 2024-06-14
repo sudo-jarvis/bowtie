@@ -1,6 +1,3 @@
-import uuid
-
-
 def get_benchmark():
 
     max_array_size = 1000000
@@ -8,30 +5,26 @@ def get_benchmark():
 
     benchmarks = []
     while array_size <= max_array_size:
-        array = [uuid.uuid4().hex for _ in range(array_size)]
 
-        both_at_first = [1, 1] + array[:-2]
-        both_at_middle = array[1:array_size//2] + [1, 1] + array[array_size//2:-1]
-        both_at_last = array[:-2] + [1, 1]
-        invalid = array
+        start = [37] + [0] * (array_size - 1)
+        middle = [0] * (array_size // 2) + [37] + [0] * (array_size // 2)
+        end = [0] * (array_size - 1) + [37]
+        invalid = [0] * array_size
 
         benchmarks.append(dict(
-            name=f"minContains_{array_size}",
+            name=f"contains_{array_size}",
             description=(
-                "A benchmark for validation of the `minContains` keyword."
+                "A benchmark for validation of the `contains` keyword."
             ),
             schema={
                 "type": "array",
-                "contains": {
-                    "type": "integer"
-                },
-                "minContains": 2
+                "contains": {"const": 37},
             },
             tests=[
-                dict(description="Both at First", instance=both_at_first),
-                dict(description="Both at Middle", instance=both_at_middle),
-                dict(description="Both at Last", instance=both_at_last),
-                dict(description="Invalid", instance=invalid),
+                dict(description="Beginning of array", instance=start),
+                dict(description="Middle of array", instance=middle),
+                dict(description="End of array", instance=end),
+                dict(description="Invalid array", instance=invalid),
             ],
         ))
         array_size *= 10

@@ -1,0 +1,1 @@
+{"description": "A benchmark for measuring performance of the implementation for the additionalProperties keyword.", "schema": {"properties": {"de66e186dd8445efa3aa08d132cfd54d": {}}, "additionalProperties": false}, "tests": [{"description": "Invalid at first", "instance": ["bc70cb85cf624ef9b79c05c6fb449c38", "de66e186dd8445efa3aa08d132cfd54d"]}]}
