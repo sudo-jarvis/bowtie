@@ -3,6 +3,7 @@ file:.
 hypothesis
 jsonschema
 markdown-it-py==3.0.0
+pyperf
 pytest
 pytest-asyncio==0.21.2
 pytest-icdiff
