@@ -36,8 +36,6 @@ jobs:
 
       - name: Install Bowtie
         uses: ./
-        with:
-          version: ${{ inputs.bowtie-version }}
 
       - name: Collect Keyword Benchmark Files
         id: keyword-benchmarks
@@ -97,8 +95,6 @@ jobs:
 
       - name: Install Bowtie
         uses: ./
-        with:
-          version: ${{ inputs.bowtie-version }}
 
       - name: Generate Benchmark Report
         run: |
@@ -116,8 +112,6 @@ jobs:
 
       - name: Install Bowtie
         uses: ./
-        with:
-          version: ${{ inputs.bowtie-version }}
 
       - name: Generate Benchmark Report
         run: |
