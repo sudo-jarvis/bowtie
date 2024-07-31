@@ -62,6 +62,8 @@ jobs:
           final_json=$(echo "$final_json" | jq -c '{ "include": . }')
           echo $final_json >> $GITHUB_STEP_SUMMARY
           echo "dialect_keyword_benchmarks=$final_json" >> $GITHUB_OUTPUT
+          
+          echo 
 
       - name: Collect Default Benchmark Files
         id: default-benchmarks
@@ -98,7 +100,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
       - name: Install Bowtie
         run: pip install -e .
 
@@ -115,9 +117,12 @@ jobs:
       matrix: ${{ fromJson(needs.benchmark_files.outputs.dialect_default_benchmarks) }}
     steps:
       - uses: actions/checkout@v4
-
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: Install Bowtie
-        uses: ./
+        run: pip install -e .
 
       - name: Generate Benchmark Report
         run: |
