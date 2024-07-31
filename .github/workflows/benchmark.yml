@@ -38,7 +38,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Bowtie
-        uses: pip install -e .
+        run: pip install -e .
 
       - name: Collect Keyword Benchmark Files
         id: keyword-benchmarks
@@ -100,7 +100,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Bowtie
-        uses: pip install -e .
+        run: pip install -e .
 
       - name: Generate Benchmark Report
         run: |
