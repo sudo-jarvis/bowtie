@@ -95,10 +95,18 @@ jobs:
       matrix: ${{ fromJson(needs.benchmark_files.outputs.dialect_keyword_benchmarks) }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
       - name: Install Bowtie
         uses: ./
         with:
           version: ${{ inputs.bowtie-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install pyperf
 
       - name: Generate Benchmark Report
         run: |
@@ -113,10 +121,18 @@ jobs:
       matrix: ${{ fromJson(needs.benchmark_files.outputs.dialect_default_benchmarks) }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
       - name: Install Bowtie
         uses: ./
         with:
           version: ${{ inputs.bowtie-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install pyperf
 
       - name: Generate Benchmark Report
         run: |
