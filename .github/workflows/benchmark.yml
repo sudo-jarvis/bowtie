@@ -33,12 +33,10 @@ jobs:
       dialect_default_benchmarks: ${{ steps.default-benchmarks.outputs.dialect_default_benchmarks }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
       - name: Install Bowtie
-        run: pip install -e .
+        uses: ./
+        with:
+          version: ${{ inputs.bowtie-version }}
 
       - name: Collect Keyword Benchmark Files
         id: keyword-benchmarks
@@ -97,12 +95,10 @@ jobs:
       matrix: ${{ fromJson(needs.benchmark_files.outputs.dialect_keyword_benchmarks) }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
       - name: Install Bowtie
-        run: pip install -e .
+        uses: ./
+        with:
+          version: ${{ inputs.bowtie-version }}
 
       - name: Generate Benchmark Report
         run: |
@@ -117,12 +113,10 @@ jobs:
       matrix: ${{ fromJson(needs.benchmark_files.outputs.dialect_default_benchmarks) }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
       - name: Install Bowtie
-        run: pip install -e .
+        uses: ./
+        with:
+          version: ${{ inputs.bowtie-version }}
 
       - name: Generate Benchmark Report
         run: |
