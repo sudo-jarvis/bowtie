@@ -110,7 +110,7 @@ jobs:
 
       - name: Generate Benchmark Report
         run: |
-          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }}
+          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q
 
   run_default_benchmarks:
     needs: benchmark_files
@@ -136,4 +136,4 @@ jobs:
 
       - name: Generate Benchmark Report
         run: |
-          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }}
+          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q
