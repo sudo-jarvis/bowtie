@@ -117,7 +117,7 @@ jobs:
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-file-${{ matrix.dialect }}-${{ matrix.benchmark }}-keyword
+          name: benchmark-file-${{ matrix.dialect }}-$(basename "${{ matrix.dialect }}")-keyword
           path: ${{ matrix.benchmark }}-keyword.json
 
   run_default_benchmarks:
@@ -149,7 +149,7 @@ jobs:
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-file-${{ matrix.dialect }}-${{ matrix.benchmark }}-default
+          name: benchmark-file-${{ matrix.dialect }}-$(basename "${{ matrix.dialect }}")-default
           path: ${{ matrix.benchmark }}-default.json
 
   merge_benchmarks_into_single_report:
