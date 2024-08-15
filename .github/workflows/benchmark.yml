@@ -112,13 +112,13 @@ jobs:
 
       - name: Generate Benchmark Report
         run: |
-          bowtie perf -i python-jsonschema -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.dialect }}-${{ matrix.benchmark }}.json
+          bowtie perf -i python-jsonschema -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-keyword.json
         
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-file-${{ matrix.dialect }}-${{ matrix.benchmark }}-keyword
-          path: ${{ matrix.dialect }}-${{ matrix.benchmark }}-keyword.json
+          path: ${{ matrix.benchmark }}-keyword.json
 
   run_default_benchmarks:
     needs: benchmark_files
@@ -144,13 +144,13 @@ jobs:
 
       - name: Generate Benchmark Report
         run: |
-          bowtie perf -i python-jsonschema -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.dialect }}-${{ matrix.benchmark }}.json
+          bowtie perf -i python-jsonschema -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-default.json
         
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-file-${{ matrix.dialect }}-${{ matrix.benchmark }}-default
-          path: ${{ matrix.dialect }}-${{ matrix.benchmark }}-default.json
+          path: ${{ matrix.benchmark }}-default.json
 
   merge_benchmarks_into_single_report:
     needs:
