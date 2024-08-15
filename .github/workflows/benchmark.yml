@@ -114,10 +114,13 @@ jobs:
         run: |
           bowtie perf -i python-jsonschema -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-keyword.json
         
+      - name: Store File basename
+        run: echo "basename=$(basename ${{ matrix.benchmark }})" >> $GITHUB_ENV
+        
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-file-${{ matrix.dialect }}-$(basename "${{ matrix.dialect }}")-keyword
+          name: benchmark-file-${{ matrix.dialect }}-${{ env.basename }}-keyword
           path: ${{ matrix.benchmark }}-keyword.json
 
   run_default_benchmarks:
@@ -146,10 +149,13 @@ jobs:
         run: |
           bowtie perf -i python-jsonschema -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-default.json
         
+      - name: Store File basename
+        run: echo "basename=$(basename ${{ matrix.benchmark }})" >> $GITHUB_ENV
+        
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-file-${{ matrix.dialect }}-$(basename "${{ matrix.dialect }}")-default
+          name: benchmark-file-${{ matrix.dialect }}-${{ env.basename }}-default
           path: ${{ matrix.benchmark }}-default.json
 
   merge_benchmarks_into_single_report:
