@@ -209,11 +209,11 @@ jobs:
               json.dump(combined_json, file, indent=4)
           EOF
 
-      - name: Show Files
-        run: ls >> $GITHUB_STEP_SUMMARY
-        
-      - name: Print Combined Json
-        run: cat benchmark-report-${{ matrix.dialect }}.json >> $GITHUB_STEP_SUMMARY
+      - name: Upload final Benchmark Report for dialect
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report-${{ matrix.dialect }}
+          path: benchmark-report-${{ matrix.dialect }}.json
     
           
   upload_benchmark_artifact:
