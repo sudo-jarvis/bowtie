@@ -76,8 +76,6 @@ jobs:
 
       - name: Install Bowtie
         uses: ./
-        with:
-          version: ${{ inputs.bowtie-version }}
 
       - name: Install pyperf dependency
         run: |
@@ -181,4 +179,3 @@ jobs:
     uses: ./.github/workflows/report.yml
     with:
       report_benchmark_artifact_in_scope: true
-      
