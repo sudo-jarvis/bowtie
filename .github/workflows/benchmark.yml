@@ -239,8 +239,8 @@ jobs:
           name: benchmarks
           path: benchmarks
 
-  # regenerate-reports:
-  #   needs: upload_benchmark_artifact
-  #   uses: ./.github/workflows/report.yml
-  #   with:
-  #     report_benchmark_artifact_in_scope: true
+  regenerate-reports:
+    needs: upload_benchmark_artifact
+    uses: ./.github/workflows/report.yml
+    with:
+      report_benchmark_artifact_in_scope: true
