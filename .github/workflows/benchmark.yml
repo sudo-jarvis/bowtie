@@ -209,8 +209,11 @@ jobs:
               json.dump(combined_json, file, indent=4)
           EOF
 
+      - name: Show Files
+        run: ls >> $GITHUB_STEP_SUMMARY
+        
       - name: Print Combined Json
-        run: echo benchmark-report-${{ matrix.dialect }}.json >> $GITHUB_STEP_SUMMARY
+        run: cat benchmark-report-${{ matrix.dialect }}.json >> $GITHUB_STEP_SUMMARY
     
           
   upload_benchmark_artifact:
