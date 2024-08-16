@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Bowtie
-        uses: ./
+        run: pip install -e .
 
       - name: Collect Benchmark Files
         id: benchmarks
@@ -75,7 +75,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Bowtie
-        uses: ./
+        run: pip install -e .
 
       - name: Install pyperf dependency
         run: |
