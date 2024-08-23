@@ -14,7 +14,19 @@ permissions:
   id-token: write
 
 jobs:
+  dialects:
+    runs-on: ubuntu-latest
+    outputs:
+      dialects: ${{ steps.dialects-matrix.outputs.dialects }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect supported dialects
+        id: dialects-matrix
+        run: |
+          printf 'dialects=%s\n' "$(jq -c '[.[].shortName]' data/dialects.json)" >> $GITHUB_OUTPUT
+
   benchmark_files:
+    needs: dialects
     runs-on: ubuntu-latest
     outputs:
       dialect_benchmarks: ${{ steps.benchmarks.outputs.dialect_benchmarks }}
@@ -27,10 +39,10 @@ jobs:
       - name: Collect Benchmark Files
         id: benchmarks
         run: |
-          dialects=$(bowtie filter-dialects)
-          printf 'dialects=%s\n' "$(echo $dialects | jq -Rc 'split(" ")')" >> $GITHUB_OUTPUT
-
+          dialects='${{ needs.dialects.outputs.dialects }}'
+          dialects=$(echo $dialects | jq -r '.[]')
           results=()
+
           for dialect in $dialects; do
             output=$(bowtie filter-benchmarks -D "$dialect")
 
@@ -66,7 +78,10 @@ jobs:
           bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-file.json
 
       - name: Store Unique Id for distinction
-        run: echo "unique_id=$(uuidgen)" >> $GITHUB_ENV
+        run: |
+          printenv
+          printenv >> $GITHUB_STEP_SUMMARY
+          echo "unique_id=$(uuidgen)" >> $GITHUB_ENV
 
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
@@ -76,14 +91,14 @@ jobs:
 
   merge_benchmarks_into_single_report:
     needs:
-      - benchmark_files
+      - dialects
       - run_benchmarks
 
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        dialect: ${{ fromJson(needs.benchmark_files.outputs.dialects) }}
+        dialect: ${{ fromJson(needs.dialects.outputs.dialects) }}
 
     steps:
       - uses: actions/checkout@v4
