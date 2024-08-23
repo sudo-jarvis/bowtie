@@ -5,8 +5,8 @@ name: Collect New Benchmark Results
 on:
   workflow_dispatch:
   schedule:
-    # Every Monday at 00:00 UTC
-    - cron: "0 0 * * 1"
+    # Every Monday at 08:00 UTC
+    - cron: "0 8 * * 1"
 
 permissions:
   contents: read
@@ -14,73 +14,40 @@ permissions:
   id-token: write
 
 jobs:
-  dialects:
-    runs-on: ubuntu-latest
-    outputs:
-      dialects: ${{ steps.dialects-matrix.outputs.dialects }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Collect supported dialects
-        id: dialects-matrix
-        run: |
-          printf 'dialects=%s\n' "$(jq -c '[.[].shortName]' data/dialects.json)" >> $GITHUB_OUTPUT
-
   benchmark_files:
-    needs: dialects
     runs-on: ubuntu-latest
     outputs:
       dialect_benchmarks: ${{ steps.benchmarks.outputs.dialect_benchmarks }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
       - name: Install Bowtie
-        run: pip install -e .
+        uses: ./
 
       - name: Collect Benchmark Files
         id: benchmarks
         run: |
-          results=()
-          dialects='${{ needs.dialects.outputs.dialects }}'
-          dialects=$(echo $dialects | jq -r '.[]')
-          results=()
+          dialects=$(bowtie filter-dialects)
+          printf 'dialects=%s\n' "$(jq -Rc 'split(" ")' <<< "$dialects")"
 
-          for dialect in $dialects; do
-            output=$(bowtie filter-benchmarks -D "$dialect")
+          results=$(for dialect in $dialects; do
+            bowtie filter-benchmarks -D "$dialect" | jq -ncR --arg d "$dialect" '{dialect: $d, benchmark: .}'
+          done | jq -sc '.')
 
-            if [ -n "$output" ]; then
-              while IFS= read -r line; do
-                json_result=$(jq -nc --arg p "$dialect" --arg o "$line" '{ dialect: $p, benchmark: $o }')
-                results+=("$json_result")
-              done <<< "$output"
-            fi
-          done
-          final_json="$(jq -sc '.' <<< "${results[@]}")"
-          final_json=$(echo "$final_json" | jq -c '{ "include": . }')
-          echo $final_json >> $GITHUB_STEP_SUMMARY
-          echo "dialect_benchmarks=$final_json" >> $GITHUB_OUTPUT
+          final_json=$(jq -c '{ "include": . }' <<< "$results")
+          echo "dialect_benchmarks=$final_json" >> "$GITHUB_OUTPUT"
 
   run_benchmarks:
     needs: benchmark_files
     runs-on: ubuntu-latest
-    timeout-minutes: 720
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.benchmark_files.outputs.dialect_benchmarks) }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
       - name: Install Bowtie
-        run: pip install -e .
+        uses: ./
 
       - name: Install pyperf dependency
         run: |
@@ -89,10 +56,10 @@ jobs:
       - name: Generate Benchmark Report
         run: |
           bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-file.json
-        
+
       - name: Store Unique Id for distinction
         run: echo "unique_id=$(uuidgen)" >> $GITHUB_ENV
-        
+
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -101,14 +68,14 @@ jobs:
 
   merge_benchmarks_into_single_report:
     needs:
-      - dialects
+      - benchmark_files
       - run_benchmarks
 
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        dialect: ${{ fromJson(needs.dialects.outputs.dialects) }}
+        dialect: ${{ fromJson(needs.benchmark_files.outputs.dialects) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -154,12 +121,11 @@ jobs:
         with:
           name: benchmark-report-${{ matrix.dialect }}
           path: ${{ matrix.dialect }}.json
-    
-          
+
   upload_benchmark_artifact:
     needs:
       - merge_benchmarks_into_single_report
-    
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
