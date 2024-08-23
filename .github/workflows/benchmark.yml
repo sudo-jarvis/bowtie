@@ -49,11 +49,12 @@ jobs:
 
             if [ -n "$output" ]; then
               while IFS= read -r line; do
+                idx=$((idx + 1))
                 json_result=$(jq -nc --arg id "$idx" --arg p "$dialect" --arg o "$line" '{ id: $id|tonumber, dialect: $p, benchmark: $o }')
                 results+=("$json_result")
               done <<< "$output"
             fi
-            idx=$((idx + 1))
+            
           done
           final_json="$(jq -sc '.' <<< "${results[@]}")"
           final_json=$(echo "$final_json" | jq -c '{ "include": . }')
