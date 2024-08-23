@@ -54,7 +54,6 @@ jobs:
                 results+=("$json_result")
               done <<< "$output"
             fi
-            
           done
           final_json="$(jq -sc '.' <<< "${results[@]}")"
           final_json=$(echo "$final_json" | jq -c '{ "include": . }')
@@ -78,13 +77,13 @@ jobs:
 
       - name: Generate Benchmark Report
         run: |
-          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > ${{ matrix.benchmark }}-file.json
+          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > benchmark-file-${{ matrix.id }}.json
 
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-file-${{ matrix.dialect }}-${{ matrix.id }}
-          path: ${{ matrix.benchmark }}-file.json
+          path: benchmark-file-${{ matrix.id }}.json
 
   merge_benchmarks_into_single_report:
     needs:
