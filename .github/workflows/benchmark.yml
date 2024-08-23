@@ -77,7 +77,7 @@ jobs:
 
       - name: Generate Benchmark Report
         run: |
-          bowtie perf $(bowtie filter-implementations | sed 's/^/-i /') -b ${{ matrix.benchmark }} -D ${{ matrix.dialect }} -q > benchmark-file-${{ matrix.id }}.json
+          bowtie perf -i python-jsonschema -D ${{ matrix.dialect }} -q > benchmark-file-${{ matrix.id }}.json
 
       - name: Upload Benchmark file as artifact
         uses: actions/upload-artifact@v4
