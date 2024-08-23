@@ -28,14 +28,22 @@ jobs:
         id: benchmarks
         run: |
           dialects=$(bowtie filter-dialects)
-          printf 'dialects=%s\n' "$(jq -Rc 'split(" ")' <<< "$dialects")"
+          printf 'dialects=%s\n' "$(echo $dialects | jq -Rc 'split(" ")')" >> $GITHUB_OUTPUT
 
-          results=$(for dialect in $dialects; do
-            bowtie filter-benchmarks -D "$dialect" | jq -ncR --arg d "$dialect" '{dialect: $d, benchmark: .}'
-          done | jq -sc '.')
+          results=()
+          for dialect in $dialects; do
+            output=$(bowtie filter-benchmarks -D "$dialect")
 
-          final_json=$(jq -c '{ "include": . }' <<< "$results")
-          echo "dialect_benchmarks=$final_json" >> "$GITHUB_OUTPUT"
+            if [ -n "$output" ]; then
+              while IFS= read -r line; do
+                json_result=$(jq -nc --arg p "$dialect" --arg o "$line" '{ dialect: $p, benchmark: $o }')
+                results+=("$json_result")
+              done <<< "$output"
+            fi
+          done
+          final_json="$(jq -sc '.' <<< "${results[@]}")"
+          final_json=$(echo "$final_json" | jq -c '{ "include": . }')
+          echo "dialect_benchmarks=$final_json" >> $GITHUB_OUTPUT
 
   run_benchmarks:
     needs: benchmark_files
