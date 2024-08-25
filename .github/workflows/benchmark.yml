@@ -100,7 +100,7 @@ jobs:
 
       - name: Install Bowtie
         run: | 
-          uv pip install .
+          uv pip install --system .
 
       - name: Merge Benchmark Reports for a dialect
         run: |
