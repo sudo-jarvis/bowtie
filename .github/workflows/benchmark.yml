@@ -90,14 +90,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Bowtie
-        uses: ./
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
 
-      - name: Print env
+      - name: Install Bowtie
         run: |
-          printenv
-          printenv | grep python
-          printenv >> $GITHUB_STEP_SUMMARY
+          uv tool install .
 
       - name: Merge Benchmark Reports for a dialect
         run: |
