@@ -90,14 +90,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
+      - name: Set up uv
+        uses: hynek/setup-cached-uv@v2
 
       - name: Install Bowtie
         run: | 
-          pip install uv
           uv pip install .
 
       - name: Merge Benchmark Reports for a dialect
