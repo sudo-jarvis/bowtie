@@ -86,28 +86,18 @@ jobs:
           path: benchmark-file-${{ matrix.id }}.json
 
   merge_benchmarks_into_single_report:
-    needs:
-      - dialects
-      - run_benchmarks
-
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dialect: ${{ fromJson(needs.dialects.outputs.dialects) }}
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Benchmark Reports for a dialect
-        uses: actions/download-artifact@v4
-        with:
-          pattern: benchmark-file-${{ matrix.dialect }}-*
-          path: benchmarks-${{ matrix.dialect }}/
-          merge-multiple: true
-
       - name: Install Bowtie
         uses: ./
+
+      - name: Print env
+        run: |
+          printenv
+          printenv | grep python
+          printenv >> $GITHUB_STEP_SUMMARY
 
       - name: Merge Benchmark Reports for a dialect
         run: |
