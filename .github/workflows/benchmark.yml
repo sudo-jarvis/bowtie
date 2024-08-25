@@ -96,8 +96,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Bowtie
-        run: |
-          uv tool install .
+        uses: ./
 
       - name: Merge Benchmark Reports for a dialect
         run: |
